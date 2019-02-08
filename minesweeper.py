@@ -42,7 +42,6 @@ for i in range(p):
 			pass
 
 def click_count():
-	print(cc)
 	cc[0]=cc[0]+1
 	if cc[0]==90:
 		win()
@@ -115,12 +114,15 @@ class butt:
 
 	def countdisp(self):
 		self.count=mine_count[self.i,self.j]
-		if self.count==0:
-			for l in range(-1,2):
-				for m in range(-1,2):
-					if (self.i+l) in range(10) and (self.j+m) in range(10) and buttonslist[self.i+l,self.j+m].status==1:
-						buttonslist[self.i+l,self.j+m].status=0
-						buttonslist[self.i+l,self.j+m].action()
+		for l in range(-1,2):
+			for m in range(-1,2):
+				condition=(self.i+l) in range(10) and (self.j+m) in range(10) and buttonslist[self.i+l,self.j+m].status==1
+				condition1= condition and self.count!=10 and self.count!=0 and mine_count[self.i+l,self.j+m]==0
+				condition2= condition and self.count==0
+				if condition1 or condition2:
+					buttonslist[self.i+l,self.j+m].status=0
+					buttonslist[self.i+l,self.j+m].action()
+
 		switch={
 		1:imone,
 		2:imtwo,
