@@ -18,7 +18,7 @@ root.configure(background="gray30")
 try:
 	im3 = PhotoImage(file="bomb.png")
 	im2 = PhotoImage(file="flag.png")
-	im  = PhotoImage(file="start.png")
+	im  = PhotoImage(file="Start.png")
 	imone = PhotoImage(file="1.png")
 	imtwo = PhotoImage(file="2.png")
 	imthree = PhotoImage(file="3.png")
