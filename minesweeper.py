@@ -1,12 +1,12 @@
 import time
-start_time=time.time()
 import gc
-import queue
 from sys import exit
+import math
 import numpy as np
 from tkinter import *
 from tkinter import messagebox as msg
-from PIL import Image,ImageTk
+
+
 
 root = Tk()
 w, h = root.winfo_screenwidth(), root.winfo_screenheight()
@@ -15,16 +15,19 @@ w1=w/2-270/2
 h1=h/2-350/2
 root.geometry("%dx%d+%d+%d" % (270,350,w1,h1))
 root.configure(background="gray30")
-im3 = PhotoImage(file="bomb.png")
-im2 = PhotoImage(file="flag.png")
-im  = PhotoImage(file="start.png")
-imone = PhotoImage(file="1.png")
-imtwo = PhotoImage(file="2.png")
-imthree = PhotoImage(file="3.png")
-imfour = PhotoImage(file="4.png")
-imfive = PhotoImage(file="5.png")
-root.iconphoto(True,im3)
-
+try:
+	im3 = PhotoImage(file="bomb.png")
+	im2 = PhotoImage(file="flag.png")
+	im  = PhotoImage(file="start.png")
+	imone = PhotoImage(file="1.png")
+	imtwo = PhotoImage(file="2.png")
+	imthree = PhotoImage(file="3.png")
+	imfour = PhotoImage(file="4.png")
+	imfive = PhotoImage(file="5.png")
+	root.iconbitmap('bomb.ico')
+except:
+	sys.exit()
+highscore=1000
 cheatlist="abcdefghij"
 
 def cheat(event):
@@ -35,21 +38,15 @@ def cheat(event):
 		for i in range(10):
 			for j in range(10):
 				if mine_loc[i,j]==10:
-					buttonslist[i,j].b.config(background="gray58")
+					buttonslist[i,j].b.config(background="red")
 
 
 root.bind("<Key>",cheat)
 
-def win():
-
-	msg.showinfo(" ","YOU WIN!")
-
-def gameover():
-	
-	msg.showinfo(" ","You lose :(!")
 
 def main():
-	global mine_loc, buttonslist
+	global mine_loc, buttonslist, flagc
+	flagc=0
 	displayframe=Frame(root,background="gray30")
 	displayframe.pack()
 	frm001=Frame(displayframe,width=250,height=45,background="gray30")
@@ -64,24 +61,32 @@ def main():
 	np.random.shuffle(mine_loc)
 	mine_loc=mine_loc.reshape(10,10)
 	#Mine count
-	mine_count=np.copy(mine_loc)
-	p,q=mine_count.shape
-	for i in range(p):
-		for j in range(q):
-			if mine_loc[i,j]==0:
-				count=0
-				for l in range(-1,2):
-					for m in range(-1,2):
-						if (i+l) in range(10) and (j+m) in range(10) and mine_loc[i+l,j+m]!=0:
-							count+=1
-				mine_count[i,j]=count
-			else:
-				pass
+	def minecount():
+		global mine_count
+		mine_count=np.copy(mine_loc)
+		p,q=mine_count.shape
+		for i in range(p):
+			for j in range(q):
+				if mine_loc[i,j]==0:
+					count=0
+					for l in range(-1,2):
+						for m in range(-1,2):
+							if (i+l) in range(10) and (j+m) in range(10) and mine_loc[i+l,j+m]!=0:
+								count+=1
+					mine_count[i,j]=count
+				else:
+					pass
+
+	minecount()
 
 	def click_count():
+		global time1
 		cc[0]=cc[0]+1
 		if cc[0]==90:
 			win()
+		elif cc[0]==1:
+			time1=time.time()
+			tick()
 		else:
 			pass
 
@@ -113,26 +118,37 @@ def main():
 			self.frm.destroy()
 
 		def action(self,event=None):
-			self.b.destroy()
-			self.status=0
-			self.frm=Frame(self.frm,width=25,height=25,background="gray30")
-			self.frm.grid_propagate(0)
-			self.frm.grid(row=self.i,column=self.j,sticky=E)
-			if mine_loc[self.i,self.j]!=0:
-				gameover()
-				self.im=im3
+			global mine_loc
+			if cc[0]!=0 or mine_loc[self.i,self.j]==0:
+				
+				self.b.destroy()
+				self.status=0
+				self.frm=Frame(self.frm,width=25,height=25,background="gray30")
+				self.frm.grid_propagate(0)
+				self.frm.grid(row=self.i,column=self.j,sticky=E)
+				if mine_loc[self.i,self.j]!=0:
+					gameover()
+					self.im=im3
+					sys.exit()
+				else:
+					self.im=self.countdisp()
+				self.b=Label(self.frm,image=self.im,width=23,bd=1,height=23,background="gray62")
+				self.b.grid_propagate(0)
+				self.b.grid(row=0,column=0,padx=1,pady=1)
+				click_count()
 			else:
-				self.im=self.countdisp()
-			self.b=Label(self.frm,image=self.im,width=23,bd=1,height=23,background="gray62")
-			self.b.grid_propagate(0)
-			self.b.grid(row=0,column=0,padx=1,pady=1)
-			click_count()
+				np.random.shuffle(mine_loc)
+				minecount()
+				self.action()
 
 		def flaggg(self,event):
-			if self.im==im:
+			global flagc
+			if self.im == im:
+				flagc = flagc + 1
 				self.im=im2
-			elif self.im==im2:
-				self.im=im
+			elif self.im == im2:
+				flagc = flagc - 1
+				self.im = im
 			self.b=Button(self.frm,image=self.im,width=23,bd=1,height=23,highlightthickness=0,background="gray62")
 			self.b.bind("<Button-3>",self.flaggg)
 			if self.im==im:
@@ -155,7 +171,10 @@ def main():
 			2:imtwo,
 			3:imthree,
 			4:imfour,
-			5:imfive
+			5:imfive,
+			6:im,
+			7:im,
+			8:im
 			}
 			return switch.get(self.count,im)
 
@@ -168,14 +187,49 @@ def main():
 			buttonslist[i,j]=b
 
 	def reset():
+		global id
+		clock.after_cancel(id)
 		displayframe.destroy()
 		gc.collect()
 		main()
 
-	bfrm=Button(frm001,text="reset",command=reset,background="gray62")
-	bfrm.pack(expand=True,fill=X,anchor=S)
-	quitb=Button(displayframe,text="quit",command=root.destroy,background="gray62")
-	quitb.pack(expand=True,fill=X)
+	bfrm=Button(frm001,text="Reset",command=reset,background="gray62",highlightthickness=0,font=[11],width=6)
+	clock=Label(frm001,bg="gray62",highlightthickness=0,bd=1,relief=RIDGE,font=[11],width=7,anchor=E)
+	mine=Label(frm001,bg="gray62",highlightthickness=0,bd=1,relief=RIDGE,font=[11],width=7,anchor=E)
+	bfrm.pack(expand=0,fill=BOTH,anchor=S,side=LEFT,padx=(0,2),pady=(15,3))
+	clock.pack(expand=0,fill=BOTH,anchor=S,side=RIGHT,padx=(2,1),pady=(15,3))
+	mine.pack(expand=0,fill=BOTH,anchor=S,side=RIGHT,padx=(2,1),pady=(15,3))
+	clock.config(text="0 ")
+	mine.config(text="10 ** ")
+	frm002=Frame(displayframe,width=250,height=45,background="gray30")
+	frm002.pack_propagate(0)
+	frm002.pack()
+	quitb=Button(frm002,text="QUIT !",command=root.destroy,background="gray62",highlightthickness=0,font=[11])
+	quitb.pack(expand=True,fill=BOTH,pady=(3,15))
+
+	def win():
+		global id,time1,highscore
+		score=round(time.time()-time1,1)
+		clock.after_cancel(id)
+		if score<highscore:
+			highscore=score
+			msg.showinfo(" ","YOU WIN!\nNEW HIGHSCORE!!")
+		else:
+			msg.showinfo(" ","YOU WIN!")
+
+	def gameover():
+		global id
+		clock.after_cancel(id)
+		msg.showinfo(" ","You lose :(!")
+		reset()
+
+	def tick():
+		global time1,id,flagc
+		time2=math.floor(time.time()-time1)
+		clock.config(text=time2)
+		mine.config(text="{} ** ".format(10-flagc))
+		id=clock.after(100,tick)
+
 	root.mainloop()
 
 
