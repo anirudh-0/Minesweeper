@@ -1,6 +1,6 @@
 import time
 import gc
-from sys import exit
+import sys
 import math
 import numpy as np
 from tkinter import *
@@ -24,9 +24,10 @@ try:
 	imthree = PhotoImage(file="3.png")
 	imfour = PhotoImage(file="4.png")
 	imfive = PhotoImage(file="5.png")
-	root.iconbitmap('bomb.ico')
-except:
+except Exception as e:
+	print(e)
 	sys.exit()
+ 
 highscore=1000
 cheatlist="abcdefghij"
 
